@@ -1,0 +1,338 @@
+
+#define N_BIOMESdemo 5
+struct BiomeWeightsdemo {
+    float w[N_BIOMESdemo];
+};
+
+BiomeWeightsdemo lerp_biome_wdemo(BiomeWeightsdemo a, BiomeWeightsdemo b, float w) {
+    BiomeWeightsdemo result;
+    for(int i = 0; i < N_BIOMESdemo; i++) {
+        result.w[i] = a.w[i] * (1.0 - w) + b.w[i] * w;
+    }
+    return result;
+}
+
+#pragma once
+BiomeWeightsdemo biome_distribution0demo(int seed, float3 pos) {
+	float biome_w[5];
+	biome_w[0] = 0.0;
+	biome_w[1] = 0.0;
+	biome_w[2] = 0.0;
+	biome_w[3] = 0.0;
+	biome_w[4] = 0.0;
+	float biome_scl = 0.002631579;
+	float biome_smoothing = 0.45;
+	float2 biome_uv = float2(pos.x * biome_scl, pos.z * biome_scl);
+	float2 biome_uv_n = floor(biome_uv);
+	float2 biome_uv_f = frac(biome_uv);
+	float dist = 8.0;
+	for(int i = -2; i <= 2; i++) {
+		for(int j = -2; j <= 2; j++) {
+			float2 g = float2(float(i), float(j));
+			float2 o = hash2(biome_uv_n + g);
+			float d = length(g - biome_uv_f + o);
+			float biome = hash2(biome_uv_n + g + float2(seed, seed)).x;
+			float h = smoothstep(-1.0, 1.0, (dist - d) / biome_smoothing);
+			dist = lerp(dist, d, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			if (biome >= 0 && biome < 0.33333334) {
+				biome_w[3] = lerp(biome_w[3], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[3] = lerp(biome_w[3], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+			if (biome >= 0.33333334 && biome < 1) {
+				biome_w[4] = lerp(biome_w[4], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[4] = lerp(biome_w[4], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+		}
+	}
+	float biome_w_sum = 0.0;
+	for (int i = 0; i < 5; i++) {
+		biome_w_sum += biome_w[i];
+	}
+	for (int i = 0; i < 5; i++) {
+		biome_w[i] /= biome_w_sum;
+	}
+	BiomeWeightsdemo weights;
+	weights.w = biome_w;
+	return weights;
+}
+
+BiomeWeightsdemo biome_distribution1demo(int seed, float3 pos) {
+	float biome_w[5];
+	biome_w[0] = 0.0;
+	biome_w[1] = 0.0;
+	biome_w[2] = 0.0;
+	biome_w[3] = 0.0;
+	biome_w[4] = 0.0;
+	float biome_scl = 0.002631579;
+	float biome_smoothing = 0.45;
+	float2 biome_uv = float2(pos.x * biome_scl, pos.z * biome_scl);
+	float2 biome_uv_n = floor(biome_uv);
+	float2 biome_uv_f = frac(biome_uv);
+	float dist = 8.0;
+	for(int i = -2; i <= 2; i++) {
+		for(int j = -2; j <= 2; j++) {
+			float2 g = float2(float(i), float(j));
+			float2 o = hash2(biome_uv_n + g);
+			float d = length(g - biome_uv_f + o);
+			float biome = hash2(biome_uv_n + g + float2(seed, seed)).x;
+			float h = smoothstep(-1.0, 1.0, (dist - d) / biome_smoothing);
+			dist = lerp(dist, d, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			if (biome >= 0 && biome < 0.33333334) {
+				biome_w[3] = lerp(biome_w[3], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[3] = lerp(biome_w[3], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+			if (biome >= 0.33333334 && biome < 1) {
+				biome_w[4] = lerp(biome_w[4], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[4] = lerp(biome_w[4], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+		}
+	}
+	float biome_w_sum = 0.0;
+	for (int i = 0; i < 5; i++) {
+		biome_w_sum += biome_w[i];
+	}
+	for (int i = 0; i < 5; i++) {
+		biome_w[i] /= biome_w_sum;
+	}
+	BiomeWeightsdemo weights;
+	weights.w = biome_w;
+	return weights;
+}
+
+BiomeWeightsdemo biome_distribution2demo(int seed, float3 pos) {
+	float biome_w[5];
+	biome_w[0] = 0.0;
+	biome_w[1] = 0.0;
+	biome_w[2] = 0.0;
+	biome_w[3] = 0.0;
+	biome_w[4] = 0.0;
+	float biome_scl = 0.002631579;
+	float biome_smoothing = 0.45;
+	float2 biome_uv = float2(pos.x * biome_scl, pos.z * biome_scl);
+	float2 biome_uv_n = floor(biome_uv);
+	float2 biome_uv_f = frac(biome_uv);
+	float dist = 8.0;
+	for(int i = -2; i <= 2; i++) {
+		for(int j = -2; j <= 2; j++) {
+			float2 g = float2(float(i), float(j));
+			float2 o = hash2(biome_uv_n + g);
+			float d = length(g - biome_uv_f + o);
+			float biome = hash2(biome_uv_n + g + float2(seed, seed)).x;
+			float h = smoothstep(-1.0, 1.0, (dist - d) / biome_smoothing);
+			dist = lerp(dist, d, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			if (biome >= 0 && biome < 0.4054054) {
+				biome_w[0] = lerp(biome_w[0], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[0] = lerp(biome_w[0], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+			if (biome >= 0.4054054 && biome < 0.6756757) {
+				biome_w[1] = lerp(biome_w[1], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[1] = lerp(biome_w[1], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+			if (biome >= 0.6756757 && biome < 0.7297297) {
+				biome_w[2] = lerp(biome_w[2], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[2] = lerp(biome_w[2], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+			if (biome >= 0.7297297 && biome < 1) {
+				biome_w[3] = lerp(biome_w[3], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[3] = lerp(biome_w[3], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+		}
+	}
+	float biome_w_sum = 0.0;
+	for (int i = 0; i < 5; i++) {
+		biome_w_sum += biome_w[i];
+	}
+	for (int i = 0; i < 5; i++) {
+		biome_w[i] /= biome_w_sum;
+	}
+	BiomeWeightsdemo weights;
+	weights.w = biome_w;
+	return weights;
+}
+
+BiomeWeightsdemo biome_distribution3demo(int seed, float3 pos) {
+	float biome_w[5];
+	biome_w[0] = 0.0;
+	biome_w[1] = 0.0;
+	biome_w[2] = 0.0;
+	biome_w[3] = 0.0;
+	biome_w[4] = 0.0;
+	float biome_scl = 0.002631579;
+	float biome_smoothing = 0.45;
+	float2 biome_uv = float2(pos.x * biome_scl, pos.z * biome_scl);
+	float2 biome_uv_n = floor(biome_uv);
+	float2 biome_uv_f = frac(biome_uv);
+	float dist = 8.0;
+	for(int i = -2; i <= 2; i++) {
+		for(int j = -2; j <= 2; j++) {
+			float2 g = float2(float(i), float(j));
+			float2 o = hash2(biome_uv_n + g);
+			float d = length(g - biome_uv_f + o);
+			float biome = hash2(biome_uv_n + g + float2(seed, seed)).x;
+			float h = smoothstep(-1.0, 1.0, (dist - d) / biome_smoothing);
+			dist = lerp(dist, d, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			if (biome >= 0 && biome < 0.5555555) {
+				biome_w[0] = lerp(biome_w[0], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[0] = lerp(biome_w[0], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+			if (biome >= 0.5555555 && biome < 0.9259259) {
+				biome_w[1] = lerp(biome_w[1], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[1] = lerp(biome_w[1], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+			if (biome >= 0.9259259 && biome < 1) {
+				biome_w[2] = lerp(biome_w[2], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[2] = lerp(biome_w[2], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+		}
+	}
+	float biome_w_sum = 0.0;
+	for (int i = 0; i < 5; i++) {
+		biome_w_sum += biome_w[i];
+	}
+	for (int i = 0; i < 5; i++) {
+		biome_w[i] /= biome_w_sum;
+	}
+	BiomeWeightsdemo weights;
+	weights.w = biome_w;
+	return weights;
+}
+
+BiomeWeightsdemo biome_distribution4demo(int seed, float3 pos) {
+	float biome_w[5];
+	biome_w[0] = 0.0;
+	biome_w[1] = 0.0;
+	biome_w[2] = 0.0;
+	biome_w[3] = 0.0;
+	biome_w[4] = 0.0;
+	float biome_scl = 0.002631579;
+	float biome_smoothing = 0.45;
+	float2 biome_uv = float2(pos.x * biome_scl, pos.z * biome_scl);
+	float2 biome_uv_n = floor(biome_uv);
+	float2 biome_uv_f = frac(biome_uv);
+	float dist = 8.0;
+	for(int i = -2; i <= 2; i++) {
+		for(int j = -2; j <= 2; j++) {
+			float2 g = float2(float(i), float(j));
+			float2 o = hash2(biome_uv_n + g);
+			float d = length(g - biome_uv_f + o);
+			float biome = hash2(biome_uv_n + g + float2(seed, seed)).x;
+			float h = smoothstep(-1.0, 1.0, (dist - d) / biome_smoothing);
+			dist = lerp(dist, d, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			if (biome >= 0 && biome < 0.5555555) {
+				biome_w[0] = lerp(biome_w[0], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[0] = lerp(biome_w[0], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+			if (biome >= 0.5555555 && biome < 0.9259259) {
+				biome_w[1] = lerp(biome_w[1], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[1] = lerp(biome_w[1], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+			if (biome >= 0.9259259 && biome < 1) {
+				biome_w[2] = lerp(biome_w[2], 1.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			} else {
+				biome_w[2] = lerp(biome_w[2], 0.0, h) - h * (1.0 - h) * biome_smoothing / (1.0 + 3.0 * biome_smoothing);
+			}
+		}
+	}
+	float biome_w_sum = 0.0;
+	for (int i = 0; i < 5; i++) {
+		biome_w_sum += biome_w[i];
+	}
+	for (int i = 0; i < 5; i++) {
+		biome_w[i] /= biome_w_sum;
+	}
+	BiomeWeightsdemo weights;
+	weights.w = biome_w;
+	return weights;
+}
+
+BiomeWeightsdemo biome_distributiondemo(int seed, float3 pos) {
+	if (pos.y < -99999.5) {
+		return biome_distribution0demo(seed, pos);
+	} else if (pos.y < -99998.5) {
+		return lerp_biome_wdemo(biome_distribution0demo(seed, pos), biome_distribution1demo(seed, pos), pos.y - -99999.5);
+	} else if (pos.y < -20.5) {
+		return biome_distribution1demo(seed, pos);
+	} else if (pos.y < -19.5) {
+		return lerp_biome_wdemo(biome_distribution1demo(seed, pos), biome_distribution2demo(seed, pos), pos.y - -20.5);
+	} else if (pos.y < -10.5) {
+		return biome_distribution2demo(seed, pos);
+	} else if (pos.y < -9.5) {
+		return lerp_biome_wdemo(biome_distribution2demo(seed, pos), biome_distribution3demo(seed, pos), pos.y - -10.5);
+	} else if (pos.y < 99998.5) {
+		return biome_distribution3demo(seed, pos);
+	} else if (pos.y < 99999.5) {
+		return lerp_biome_wdemo(biome_distribution3demo(seed, pos), biome_distribution4demo(seed, pos), pos.y - 99998.5);
+	} else {
+		return biome_distribution4demo(seed, pos);
+	}
+}
+
+
+float GetNoiseDensitydemo(float3 unrealPos) {
+    float3 pos = float3(unrealPos.x, unrealPos.z, unrealPos.y); // they'll be none the wiser
+    Terrain terrain_out;
+
+BiomeWeightsdemo biome_w = biome_distributiondemo(seed, pos);
+	float b_0 = biome_w.w[0] * 25 + biome_w.w[1] * 2 + biome_w.w[2] * 20 + biome_w.w[3] * 0 + biome_w.w[4] * 0;
+	float b_1 = biome_w.w[0] * 0 + biome_w.w[1] * 0 + biome_w.w[2] * 250 + biome_w.w[3] * 0 + biome_w.w[4] * 0;
+	Terrain val_0 = make_terrain(spaghetti_cave_noise(seed, pos * 0.25));
+	float val_1 = b_0;
+	float val_2 = noise_height(seed, pos, 0.0, val_1, 1.0);
+	float val_3 = b_1;
+	float val_4 = noise_height(seed, pos, 0.0, val_3, 0.3);
+	float val_5 = val_2 + val_4;
+	Terrain val_6 = make_terrain(2.0 * smoothstep(-2.5, 2.5, pos.y - val_5) - 1.0);
+	Terrain val_7 = terrain_erode(val_0, -0.1);
+	Terrain val_8 = make_terrain(2.0 * smoothstep(-2.5, 2.5, pos.y - -2.0) - 1.0);
+	Terrain val_9 = terrain_invert(val_8);
+	Terrain val_10 = terrain_union(val_7, val_9);
+	Terrain val_11 = terrain_intersect(val_6, val_10);
+	terrain_out = val_11;
+    return terrain_out.sdf;
+}
+float4 GetVertexColordemo(float3 unrealPos) {
+
+#if N_BIOMESdemo == 1
+
+    return float4(1, 0, 0, 0);
+
+#else
+
+    float3 pos = float3(unrealPos.x, unrealPos.z, unrealPos.y); // they'll be none the wiser
+
+    BiomeWeightsdemo weights = biome_distributiondemo(seed, pos);
+
+    int tex0 = 0;
+    int tex1 = 1;
+    if(weights.w[1] > weights.w[0]) {
+        tex0 = 1;
+        tex1 = 0;
+    }
+    for(int i = 2; i < N_BIOMESdemo; i++) {
+        if(weights.w[i] > weights.w[tex0]) {
+            tex1 = tex0;
+            tex0 = i;
+        } else if(weights.w[i] > weights.w[tex1]) {
+            tex1 = i;
+        }
+    }
+    float tex_w = weights.w[tex1] / (weights.w[tex0] + weights.w[tex1]);
+        
+    return float4(1 - tex_w, tex_w, tex0, tex1); 
+
+#endif
+
+}

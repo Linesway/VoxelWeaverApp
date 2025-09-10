@@ -1,0 +1,34 @@
+
+float4 GetVertexColor<ProjectName>(float3 unrealPos) {
+
+#if N_BIOMES<ProjectName> == 1
+
+    return float4(1, 0, 0, 0);
+
+#else
+
+    float3 pos = float3(unrealPos.x, unrealPos.z, unrealPos.y); // they'll be none the wiser
+
+    BiomeWeights<ProjectName> weights = biome_distribution<ProjectName>(seed, pos);
+
+    int tex0 = 0;
+    int tex1 = 1;
+    if(weights.w[1] > weights.w[0]) {
+        tex0 = 1;
+        tex1 = 0;
+    }
+    for(int i = 2; i < N_BIOMES<ProjectName>; i++) {
+        if(weights.w[i] > weights.w[tex0]) {
+            tex1 = tex0;
+            tex0 = i;
+        } else if(weights.w[i] > weights.w[tex1]) {
+            tex1 = i;
+        }
+    }
+    float tex_w = weights.w[tex1] / (weights.w[tex0] + weights.w[tex1]);
+        
+    return float4(1 - tex_w, tex_w, tex1, tex0); 
+
+#endif
+
+}

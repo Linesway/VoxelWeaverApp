@@ -1,0 +1,135 @@
+
+struct Terrain {
+    float sdf;
+};
+
+float2 hash2(float2 p) {
+    float2 q = float2(dot(p, float2(127.1,311.7)), dot(p, float2(269.5,183.3)));
+    return frac(sin(q) * 43758.5453);
+}
+
+float smoothmin(float a, float b, float k) {
+    float x = b - a;
+    return 0.5 * (a + b - sqrt(x * x + 4.0 * k * k));
+}
+
+float smoothmax(float a, float b, float k) {
+    float x = b - a;
+    return 0.5 * (a + b + sqrt(x * x + 4.0 * k * k));
+}
+
+float noise(int seed, float3 p) {
+    return _fnlSingleOpenSimplex23D(seed, p.x, p.y, p.z);
+}
+
+float noise01(int seed, float3 p) {
+    return 0.5 + 0.5 * noise(seed, p);
+}
+
+float cool_noise(int seed, float3 p) {
+    float res = 0.0;
+
+    float amp = 1.0;
+    float ampFac = 0.5;
+    float scl = 0.05;
+    float sclFac = 2.0;
+    float maxVal = 0.0;
+    for(int i = 0; i < 4; i++) {
+        res += noise(seed, p * scl) * amp;
+        maxVal += amp;
+        amp *= ampFac;
+        scl *= sclFac;
+    }
+
+    return res;
+}
+
+float blob_cave_noise(int seed, float3 p) {
+    float threshold = 0.85;
+    float scl = 0.03;
+    float noise_a = noise(seed, p * scl);
+    float noise_b = noise(seed, p * scl + float3(1000.0, 1000.0, 1000.0));
+    return -smoothmin(threshold - noise_a * noise_a, threshold - noise_b * noise_b, 0.3);
+}
+
+float spaghetti_cave_noise(int seed, float3 p) {
+    float scl = 0.085;
+    float noise_a = 1.0 - abs(cool_noise(seed, p * scl));
+    float noise_b = 1.0 - abs(cool_noise(seed + 1984, p * scl));
+    return noise_a * noise_b * 2.0 - 1.4;
+}
+
+Terrain make_terrain(float sdf) {
+    Terrain t;
+    t.sdf = sdf;
+    return t;
+}
+
+Terrain blend_terrains(Terrain a, Terrain b, float sdf) {
+    Terrain t;
+    t.sdf = sdf;
+    return t;
+}
+
+Terrain terrain_union(Terrain a, Terrain b) {
+    float sdf = smoothmin(a.sdf, b.sdf, 0.5);
+    return blend_terrains(a, b, sdf);
+}
+
+Terrain terrain_intersect(Terrain a, Terrain b) {
+    float sdf = smoothmax(a.sdf, b.sdf, 0.5);
+    return blend_terrains(a, b, sdf);
+}
+
+Terrain terrain_invert(Terrain t) {
+    Terrain inv;
+    inv.sdf = -t.sdf;
+    return inv;
+}
+
+Terrain terrain_erode(Terrain t, float d) {
+    Terrain res;
+    res.sdf = t.sdf + d;
+    return res;
+}
+
+float dezero(float a) {
+    if(a > 0.005) {
+        return a;
+    }
+    if(a < 0.005) {
+        return a;
+    }
+    if(a >= 0) {
+        return 0.005;
+    } else {
+        return -0.005;
+    }
+}
+
+float map01(float x, float minVal, float maxVal) {
+    return minVal + (maxVal - minVal) * x;
+}
+
+float3 calc_heightmap_coord(float3 pos, float scale) {
+    return 100.0 + 0.007 * pos * scale * float3(1.0, 0.0, 1.0);
+}
+
+float noise_height(int seed, float3 pos, float minVal, float maxVal, float scale) {
+    float scl = 1.0;
+    float amp = 1.0;
+    float total_amp = 0.0;
+    float total_noise = 0.0;
+    for(int i = 0; i < 4; i++) {
+        total_noise += noise01(seed, calc_heightmap_coord(pos, scl * scale)) * amp;
+        total_amp += amp;
+        amp *= 2.0;
+        scl *= 2.0;
+    }
+
+    return map01(total_noise / total_amp, minVal, maxVal);
+}
+
+float ridge_height(int seed, float3 pos, float minVal, float maxVal, float scale) {
+    return map01(1.0 - abs(noise(seed, calc_heightmap_coord(pos, scale))), minVal, maxVal);
+}

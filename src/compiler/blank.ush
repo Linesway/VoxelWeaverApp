@@ -1,0 +1,4 @@
+
+float GetNoiseDensity(float3 pos, int seed, int3 WorldSize) {
+    return 1.0;
+}

@@ -1,0 +1,4 @@
+
+float GetNoiseDensity<ProjectName>(float3 unrealPos) {
+    float3 pos = float3(unrealPos.x, unrealPos.z, unrealPos.y); // they'll be none the wiser
+    Terrain terrain_out;
